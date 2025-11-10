@@ -19,7 +19,7 @@ const Profile = () => {
     posts: 0,
     totalLikes: 0
   });
-  const API = 'http://localhost:5001'; // Force API URL to port 5001
+  const API = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5004'; // Force API URL to port 5004
 
   useEffect(() => {
     const fetchPosts = async (userId) => {

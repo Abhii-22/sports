@@ -6,7 +6,7 @@ const EditProfileModal = ({ user, onClose, onSave }) => {
   const [name, setName] = useState(user.name || '');
   const [bio, setBio] = useState(user.bio || '');
   const [profilePicture, setProfilePicture] = useState(null);
-  const API = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5001';
+  const API = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5004';
 
   const handleSave = async () => {
     try {

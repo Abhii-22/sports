@@ -11,7 +11,7 @@ import {
 } from 'react-icons/fa';
 import './Events.css';
 import Modal from './Modal';
-const API = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5001';
+const API = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5004';
 
 const sportIcons = {
   'Kabaddi': { icon: '🤼', color: '#FF6B6B' },

@@ -1,15 +1,79 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import './UploadEventForm.css';
 
-const UploadEventForm = ({ addEvent }) => {
+const UploadEventForm = ({ addEvent, onClose }) => {
   const { token } = useAuth();
-  const API = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5001';
+  const API = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5004';
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    title: '',
+    sportName: '',
+    place: '',
+    date: '',
+    timings: '',
+    rules: '',
+    prize1: '',
+    prize2: '',
+    prize3: '',
+    prize4: '',
+    prize5: '',
+    eventImage: null
+  });
+  
+  const formRef = useRef(null);
+  const [startY, setStartY] = useState(0);
+
+  useEffect(() => {
+    const handleBackButton = (e) => {
+      e.preventDefault();
+      onClose();
+      window.history.back();
+    };
+
+    window.addEventListener('popstate', handleBackButton);
+    
+    // Push a new state to enable back button handling
+    window.history.pushState({ modal: true }, '', window.location.pathname);
+    
+    return () => {
+      window.removeEventListener('popstate', handleBackButton);
+    };
+  }, [onClose]);
+
+  const handleTouchStart = (e) => {
+    setStartY(e.touches[0].clientY);
+  };
+
+  const handleTouchEnd = (e) => {
+    const endY = e.changedTouches[0].clientY;
+    const diff = startY - endY;
+    
+    // Swipe down to close (threshold of 100px)
+    if (diff < -100) {
+      onClose();
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value, files } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: files ? files[0] : value
+    }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const formData = new FormData(e.target);
+    setIsSubmitting(true);
+
+    const data = new FormData();
+    Object.keys(formData).forEach(key => {
+      if (formData[key]) {
+        data.append(key, formData[key]);
+      }
+    });
 
     const config = {
       headers: {
@@ -19,72 +83,146 @@ const UploadEventForm = ({ addEvent }) => {
     };
 
     try {
-      const res = await axios.post(`${API}/api/events`, formData, config);
+      const res = await axios.post(`${API}/api/events`, data, config);
       addEvent(res.data);
+      onClose();
     } catch (error) {
       console.error('Failed to upload event', error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="upload-event-form-container">
-      <h2>Upload Event</h2>
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label htmlFor="eventTitle">Event Title</label>
-          <input type="text" id="eventTitle" name="title" />
+    <div className="upload-form-dropdown">
+      <div className="dropdown-overlay" onClick={onClose}></div>
+      <div 
+        className="dropdown-content"
+        ref={formRef}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
+        <div className="dropdown-header">
+          <h3>🏆 Create New Event</h3>
+          <button className="close-btn" onClick={onClose}>×</button>
         </div>
-        <div className="form-group">
-          <label htmlFor="sportName">Sport Name</label>
-          <input type="text" id="sportName" name="sportName" />
-        </div>
-        <div className="form-group">
-          <label htmlFor="eventPlace">Event Place</label>
-          <input type="text" id="eventPlace" name="place" />
-        </div>
-        <div className="form-group">
-          <label htmlFor="eventDate">Event Date</label>
-          <input type="date" id="eventDate" name="date" />
-        </div>
-        <div className="form-group">
-          <label htmlFor="eventTimings">Event Timings</label>
-          <input type="text" id="eventTimings" name="timings" />
-        </div>
-        <div className="form-group">
-          <label htmlFor="eventRules">Event Rules</label>
-          <textarea id="eventRules" name="rules"></textarea>
-        </div>
+        
+        <form onSubmit={handleSubmit} className="event-form">
+          <div className="form-row">
+            <div className="form-group">
+              <label>Event Title *</label>
+              <input 
+                type="text" 
+                name="title" 
+                value={formData.title}
+                onChange={handleInputChange}
+                placeholder="Enter event title"
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label>Sport Name *</label>
+              <input 
+                type="text" 
+                name="sportName" 
+                value={formData.sportName}
+                onChange={handleInputChange}
+                placeholder="e.g., Cricket, Football"
+                required
+              />
+            </div>
+          </div>
 
-        <div className="prizes-section">
-          <h4>Prizes</h4>
-          <div className="prize-input">
-            <label>1st</label>
-            <input type="text" name="prize1" placeholder="Prize for 1st place" />
+          <div className="form-row">
+            <div className="form-group">
+              <label>Venue *</label>
+              <input 
+                type="text" 
+                name="place" 
+                value={formData.place}
+                onChange={handleInputChange}
+                placeholder="Event location"
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label>Date *</label>
+              <input 
+                type="date" 
+                name="date" 
+                value={formData.date}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
           </div>
-          <div className="prize-input">
-            <label>2nd</label>
-            <input type="text" name="prize2" placeholder="Prize for 2nd place" />
-          </div>
-          <div className="prize-input">
-            <label>3rd</label>
-            <input type="text" name="prize3" placeholder="Prize for 3rd place" />
-          </div>
-          <div className="prize-input">
-            <label>4th</label>
-            <input type="text" name="prize4" placeholder="Prize for 4th place" />
-          </div>
-          <div className="prize-input">
-            <label>5th</label>
-            <input type="text" name="prize5" placeholder="Prize for 5th place" />
-          </div>
-        </div>
 
-        <div className="form-group">
-          <label htmlFor="eventImage">Event Image</label>
-          <input type="file" id="eventImage" name="eventImage" />
-        </div>
-        <button type="submit">Upload</button>
-      </form>
+          <div className="form-group">
+            <label>Timings</label>
+            <input 
+              type="text" 
+              name="timings" 
+              value={formData.timings}
+              onChange={handleInputChange}
+              placeholder="e.g., 9:00 AM - 6:00 PM"
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Rules & Regulations</label>
+            <textarea 
+              name="rules" 
+              value={formData.rules}
+              onChange={handleInputChange}
+              placeholder="Describe the event rules..."
+              rows="3"
+            ></textarea>
+          </div>
+
+          <div className="prizes-section">
+            <h4>🎁 Prize Distribution</h4>
+            <div className="prizes-grid">
+              {['1st', '2nd', '3rd', '4th', '5th'].map((position, index) => (
+                <div className="prize-input" key={position}>
+                  <label>{position}</label>
+                  <input 
+                    type="text" 
+                    name={`prize${index + 1}`}
+                    value={formData[`prize${index + 1}`]}
+                    onChange={handleInputChange}
+                    placeholder="Prize details"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label>Event Image</label>
+            <div className="file-input-wrapper">
+              <input 
+                type="file" 
+                name="eventImage" 
+                onChange={handleInputChange}
+                accept="image/*"
+                id="eventImage"
+              />
+              <label htmlFor="eventImage" className="file-input-label">
+                {formData.eventImage ? formData.eventImage.name : '📷 Choose Image'}
+              </label>
+            </div>
+          </div>
+
+          <div className="form-actions">
+            <button type="button" className="cancel-btn" onClick={onClose}>
+              Cancel
+            </button>
+            <button type="submit" className="submit-btn" disabled={isSubmitting}>
+              {isSubmitting ? '⏳ Creating...' : '🚀 Create Event'}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };

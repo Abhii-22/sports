@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import './UploadModal.css';
-const API = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5001';
+const API = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5004';
 
 const UploadModal = ({ onClose, onUploadSuccess }) => {
   const [file, setFile] = useState(null);

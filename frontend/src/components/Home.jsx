@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./Home.css";
 import UploadEventForm from "./UploadEventForm";
 
-const Home = ({ showUploadForm, addEvent }) => {
+const Home = ({ showUploadForm, addEvent, onClose }) => {
   const [rotation, setRotation] = useState(0);
 
   useEffect(() => {
@@ -28,7 +28,7 @@ const Home = ({ showUploadForm, addEvent }) => {
 
       <div className="bottom-content">
         {showUploadForm ? (
-          <UploadEventForm addEvent={addEvent} />
+          <UploadEventForm addEvent={addEvent} onClose={onClose} />
         ) : (
           <div className="circle-carousel-container">
             <div

@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useApp } from '../context/AppContext';
 import './Header.css';
 
-const Header = ({ onUploadClick }) => {
+const Header = () => {
   const { currentUser } = useAuth();
+  const { toggleUploadForm } = useApp();
   const [isVisible, setIsVisible] = useState(true);
   const location = useLocation();
 
@@ -31,7 +33,7 @@ const Header = ({ onUploadClick }) => {
       <div className="auth-buttons">
         {currentUser ? (
           <>
-            <button onClick={onUploadClick} className="btn btn-upload">Upload Event</button>
+            <button onClick={toggleUploadForm} className="btn btn-upload">Upload Event</button>
             <div className="profile-container">
               <Link to="/profile" className="profile-icon">
                 {currentUser.name.charAt(0).toUpperCase()}
