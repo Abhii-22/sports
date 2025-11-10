@@ -1,10 +1,8 @@
 import React from 'react';
 import { FaHeart } from 'react-icons/fa';
 import './ChampionsPage.css';
-import { useAuth } from '../context/AuthContext';
 
 const ChampionsPage = ({ reels, handleLike }) => {
-  const { currentUser } = useAuth();
 
   return (
     <div className="reels-container">

@@ -14,7 +14,7 @@ import { useApp } from '../context/AppContext';
 
 const AppLayout = () => {
   const location = useLocation();
-  const { showUploadForm, events, reels, addEvent, addReel, handleLike, closeUploadForm } = useApp();
+  const { events, reels, addEvent, addReel, handleLike, closeUploadForm } = useApp();
   
   const noNavRoutes = ['/', '/signin', '/signup'];
   const shouldShowNav = !noNavRoutes.includes(location.pathname);

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './BottomNav.css';
-import { FaHome, FaSearch, FaFutbol, FaPlusSquare, FaYoutube, FaUser } from 'react-icons/fa';
+import { FaHome, FaFutbol, FaPlusSquare, FaYoutube, FaUser } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
 
 const BottomNav = () => {
