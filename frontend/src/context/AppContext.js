@@ -43,9 +43,9 @@ export const AppProvider = ({ children }) => {
           src: `${API}${post.mediaUrl}`,
           type: post.mediaType,
           likes: post.likes || 0,
-          liked: currentUser && post.likedBy?.some(likedUser => 
-            likedUser._id === currentUser._id || likedUser.toString() === currentUser._id
-          ) || false,
+          liked: ((currentUser) && (post.likedBy?.some(likedUser => 
+            (likedUser._id === currentUser._id) || (likedUser.toString() === currentUser._id)
+          ))) || false,
           uploadedBy: post.user ? {
             name: post.user.name,
             email: post.user.email,
@@ -64,7 +64,7 @@ export const AppProvider = ({ children }) => {
 
     fetchEvents();
     fetchAllPosts();
-  }, [API, currentUser]);
+  }, [currentUser]);
 
   const addEvent = (newEvent) => {
     setEvents(prevEvents => [...prevEvents, { ...newEvent, id: prevEvents.length + 1 }]);
@@ -132,9 +132,6 @@ export const AppProvider = ({ children }) => {
     }
   };
 
-  const updateUser = (user) => {
-    setCurrentUser(user);
-  };
 
   const toggleUploadForm = () => {
     setShowUploadForm(prev => !prev);

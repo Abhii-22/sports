@@ -1,12 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
 import { 
-  FaCalendarAlt, FaMapMarkerAlt, FaTrophy, 
-  FaFutbol, FaBasketballBall, FaMedal, FaAward, FaCrown, FaSearch,
-  FaFilter, FaStar, FaClock, FaFire, FaChevronRight,
-  FaTicketAlt, FaShareAlt, FaHeart, FaEye, FaBookmark,
-  FaSpinner, FaFlag, FaUsers, FaChartLine, FaBolt, FaTags,
-  FaLocationArrow, FaCalendarDay, FaInfoCircle, FaGlobe,
+  FaCalendarAlt, FaTrophy, 
+  FaSearch,
+  FaFilter, FaClock, FaChevronRight,
+  FaShareAlt, FaEye, FaBookmark,
+  FaFlag, FaChartLine, FaBolt, FaTags,
+  FaLocationArrow, FaCalendarDay, FaInfoCircle,
   FaArrowRight, FaExpand, FaCompress, FaTh, FaList
 } from 'react-icons/fa';
 import './Events.css';
@@ -41,7 +40,6 @@ const Events = ({ events = [] }) => {
   const [hoveredCard, setHoveredCard] = useState(null);
   const [expandedCard, setExpandedCard] = useState(null);
   const [filterOpen, setFilterOpen] = useState(false);
-  const navigate = useNavigate();
 
   const sports = ['All', 'Kabaddi', 'Cricket', 'Volleyball', 'Tennis', 'Badminton', 'Others'];
 

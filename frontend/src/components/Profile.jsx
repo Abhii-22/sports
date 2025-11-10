@@ -28,9 +28,9 @@ const Profile = () => {
         // Add liked status to each post
         const postsWithLikedStatus = res.data.map(post => ({
           ...post,
-          liked: currentUser && post.likedBy?.some(likedUser => 
-            likedUser._id === currentUser._id || likedUser.toString() === currentUser._id
-          ) || false
+          liked: (currentUser && post.likedBy?.some(likedUser => 
+            (likedUser._id === currentUser._id) || (likedUser.toString() === currentUser._id)
+          )) || false
         }));
         setPosts(postsWithLikedStatus);
         // Update stats
@@ -76,9 +76,9 @@ const Profile = () => {
         // Add liked status to each post
         const postsWithLikedStatus = res.data.map(post => ({
           ...post,
-          liked: currentUser && post.likedBy?.some(likedUser => 
-            likedUser._id === currentUser._id || likedUser.toString() === currentUser._id
-          ) || false
+          liked: (currentUser && post.likedBy?.some(likedUser => 
+            (likedUser._id === currentUser._id) || (likedUser.toString() === currentUser._id)
+          )) || false
         }));
         setPosts(postsWithLikedStatus);
         setStats(prev => ({
