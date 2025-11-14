@@ -43,3 +43,38 @@ exports.getEvents = async (req, res) => {
     res.status(500).send('Server error');
   }
 };
+
+// Get events by user
+// Track event view
+exports.trackEventView = async (req, res) => {
+  try {
+    const event = await Event.findById(req.params.id);
+    
+    if (!event) {
+      return res.status(404).json({ msg: 'Event not found' });
+    }
+
+    // Check if user has already viewed this event
+    if (req.user && !event.viewedBy.includes(req.user.id)) {
+      event.viewedBy.push(req.user.id);
+      event.viewCount += 1;
+      await event.save();
+    }
+
+    res.json({ viewCount: event.viewCount });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server error');
+  }
+};
+
+// Get events by user
+exports.getEventsByUser = async (req, res) => {
+  try {
+    const events = await Event.find({ uploadedBy: req.params.userId }).sort({ createdAt: -1 }).populate('uploadedBy', 'name');
+    res.json(events);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server error');
+  }
+};

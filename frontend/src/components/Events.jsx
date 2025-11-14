@@ -29,9 +29,71 @@ const prizeIcons = {
   '5th': { icon: '⭐', class: 'star' }
 };
 
-const Events = ({ events = [] }) => {
+const Events = ({ events: initialEvents = [] }) => {
+  const [eventsList, setEventsList] = useState(initialEvents);
+
+  // Update events list when the initialEvents prop changes
+  React.useEffect(() => {
+    setEventsList(initialEvents);
+  }, [initialEvents]);
+
+  // Track if a view has been recorded for each event
+  const [viewedEvents, setViewedEvents] = useState(new Set());
+
+  const trackEventView = async (eventId) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return; // Only track for logged-in users
+      
+      // Check if this user has already viewed this event in this session
+      if (viewedEvents.has(eventId)) {
+        return; // Already viewed, don't count again
+      }
+      
+      // Optimistically update the UI
+      setEventsList(prevEvents => 
+        prevEvents.map(event => 
+          event._id === eventId 
+            ? { ...event, viewCount: (event.viewCount || 0) + 1 } 
+            : event
+        )
+      );
+      
+      // Mark this event as viewed by this user in this session
+      setViewedEvents(prev => new Set(prev).add(eventId));
+      
+      // Send the view to the server
+      const response = await fetch(`${API}/api/events/view/${eventId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-auth-token': token
+        }
+      });
+      
+      // If there's an error, revert the optimistic update
+      if (!response.ok) {
+        setEventsList(prevEvents => 
+          prevEvents.map(event => 
+            event._id === eventId 
+              ? { ...event, viewCount: Math.max(0, (event.viewCount || 1) - 1) } 
+              : event
+          )
+        );
+        // Remove from viewed events to allow retry
+        setViewedEvents(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(eventId);
+          return newSet;
+        });
+      }
+    } catch (error) {
+      console.error('Error tracking event view:', error);
+    }
+  };
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPoster, setSelectedPoster] = useState(null);
+  const [selectedEvent, setSelectedEvent] = useState(null);
   const [selectedSport, setSelectedSport] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('date');
@@ -40,10 +102,11 @@ const Events = ({ events = [] }) => {
   const [hoveredCard, setHoveredCard] = useState(null);
   const [expandedCard, setExpandedCard] = useState(null);
   const [filterOpen, setFilterOpen] = useState(false);
+  const [showEventSections, setShowEventSections] = useState(false);
 
   const sports = ['All', 'Kabaddi', 'Cricket', 'Volleyball', 'Tennis', 'Badminton', 'Others'];
 
-  const filteredAndSortedEvents = events
+  const filteredAndSortedEvents = eventsList
     .filter(event => {
       const matchesSport = selectedSport === 'All' || 
         (event.sportName && event.sportName.toLowerCase() === selectedSport.toLowerCase());
@@ -84,10 +147,13 @@ const Events = ({ events = [] }) => {
   };
 
   const handleCardClick = (event) => {
-    if (expandedCard === event._id) {
-      setExpandedCard(null);
-    } else {
-      setExpandedCard(event._id);
+    setSelectedEvent(event);
+    setSelectedPoster(`${API}${event.poster}`);
+    setExpandedCard(expandedCard === event._id ? null : event._id);
+    
+    // Track the view when a card is clicked
+    if (event._id) {
+      trackEventView(event._id);
     }
   };
 
@@ -108,22 +174,22 @@ const Events = ({ events = [] }) => {
     return { text: `${days} days`, class: 'upcoming', color: '#A8E6CF' };
   };
 
-  const getStatsData = () => {
+  const getStatsData = (eventsToCheck) => {
     const today = new Date();
-    const upcoming = events.filter(e => new Date(e.date) > today).length;
-    const todayEvents = events.filter(e => {
+    const upcoming = eventsToCheck.filter(e => new Date(e.date) > today).length;
+    const todayEvents = eventsToCheck.filter(e => {
       const eventDate = new Date(e.date);
       return eventDate.toDateString() === today.toDateString();
     }).length;
     
     return {
-      total: events.length,
+      total: eventsToCheck.length,
       upcoming,
       today: todayEvents
     };
   };
 
-  const stats = getStatsData();
+  const stats = getStatsData(eventsList);
 
   return (
     <>
@@ -172,7 +238,20 @@ const Events = ({ events = [] }) => {
               </div>
             </div>
 
+            {/* Event Sections Toggle Button */}
+            <div className="event-sections-toggle">
+              <button 
+                className="toggle-sections-btn"
+                onClick={() => setShowEventSections(!showEventSections)}
+              >
+                <FaFilter />
+                <span>{showEventSections ? 'Hide' : 'Show'} Event Sections</span>
+                <FaChevronRight className={`chevron ${showEventSections ? 'open' : ''}`} />
+              </button>
+            </div>
+
             {/* Stats Cards */}
+            {showEventSections && (
             <div className="stats-grid">
               <div className="stat-card-modern">
                 <div className="stat-icon-wrapper total">
@@ -204,6 +283,7 @@ const Events = ({ events = [] }) => {
                 </div>
               </div>
             </div>
+            )}
           </div>
         </section>
 
@@ -373,7 +453,12 @@ const Events = ({ events = [] }) => {
                     </div>
 
                     {/* Event Visual */}
-                    <div className="event-visual-modern" onClick={() => openModal(`${API}${event.poster}`)}>
+                    <div className="event-visual-modern" onClick={() => {
+                      openModal(`${API}${event.poster}`);
+                      if (event._id) {
+                        trackEventView(event._id);
+                      }
+                    }}>
                       <div className="poster-wrapper">
                         <img 
                           src={`${API}${event.poster}`} 
@@ -382,10 +467,6 @@ const Events = ({ events = [] }) => {
                         />
                         <div className="poster-overlay-modern">
                           <div className="overlay-content">
-                            <div className="view-info">
-                              <FaEye />
-                              <span>{event.views || 0} views</span>
-                            </div>
                             <div className="expand-hint">
                               <FaExpand />
                               <span>Click to expand</span>

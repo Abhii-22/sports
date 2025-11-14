@@ -35,6 +35,14 @@ const eventSchema = new mongoose.Schema({
   prizes: {
     type: Object,
   },
+  viewCount: {
+    type: Number,
+    default: 0,
+  },
+  viewedBy: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+  }],
 }, { timestamps: true });
 
 module.exports = mongoose.model('Event', eventSchema);
