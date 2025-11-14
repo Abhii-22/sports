@@ -117,13 +117,22 @@ const Events = ({ events: initialEvents = [] }) => {
     })
     .sort((a, b) => {
       if (sortBy === 'date') {
-        return new Date(a.date) - new Date(b.date);
+        // First try to sort by createdAt if available (newest first)
+        if (a.createdAt && b.createdAt) {
+          return new Date(b.createdAt) - new Date(a.createdAt);
+        }
+        // Fallback to event date if createdAt is not available
+        return new Date(b.date) - new Date(a.date);
       } else if (sortBy === 'title') {
         return a.title.localeCompare(b.title);
       } else if (sortBy === 'popularity') {
         return (b.views || 0) - (a.views || 0);
       }
-      return 0;
+      // Default: sort by createdAt (newest first) or date if createdAt is not available
+      if (a.createdAt && b.createdAt) {
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      }
+      return new Date(b.date) - new Date(a.date);
     });
 
   const openModal = (poster) => {
