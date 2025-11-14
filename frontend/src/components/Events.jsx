@@ -96,6 +96,7 @@ const Events = ({ events: initialEvents = [] }) => {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [selectedSport, setSelectedSport] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
+  const [locationSearch, setLocationSearch] = useState('');
   const [sortBy, setSortBy] = useState('date');
   const [viewMode, setViewMode] = useState('grid');
   const [savedEvents, setSavedEvents] = useState(new Set());
@@ -111,9 +112,10 @@ const Events = ({ events: initialEvents = [] }) => {
       const matchesSport = selectedSport === 'All' || 
         (event.sportName && event.sportName.toLowerCase() === selectedSport.toLowerCase());
       const matchesSearch = event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (event.place && event.place.toLowerCase().includes(searchTerm.toLowerCase())) ||
         (event.sportName && event.sportName.toLowerCase().includes(searchTerm.toLowerCase()));
-      return matchesSport && matchesSearch;
+      const matchesLocation = !locationSearch || 
+        (event.place && event.place.toLowerCase().includes(locationSearch.toLowerCase()));
+      return matchesSport && matchesSearch && matchesLocation;
     })
     .sort((a, b) => {
       if (sortBy === 'date') {
@@ -312,15 +314,25 @@ const Events = ({ events: initialEvents = [] }) => {
           <div className={`filter-content ${filterOpen ? 'open' : ''}`}>
             <div className="filter-row">
               <div className="search-wrapper">
-                <div className="search-input-modern">
-                  <FaSearch className="search-icon" />
-                  <input
-                    type="text"
-                    placeholder="Search events, sports, or locations..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="search-field"
-                  />
+                <div className="search-container">
+                  <div className="search-bar">
+                    <FaSearch className="search-icon" />
+                    <input
+                      type="text"
+                      placeholder="Search events..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                  </div>
+                  <div className="search-bar location-search">
+                    <FaLocationArrow className="search-icon" />
+                    <input
+                      type="text"
+                      placeholder="Search by location..."
+                      value={locationSearch}
+                      onChange={(e) => setLocationSearch(e.target.value)}
+                    />
+                  </div>
                 </div>
               </div>
               
