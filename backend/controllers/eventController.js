@@ -2,28 +2,38 @@ const Event = require('../models/Event');
 
 // Create a new event
 exports.createEvent = async (req, res) => {
-  const { title, sportName, date, place, rules, icon, prize1, prize2, prize3, prize4, prize5 } = req.body;
-
   try {
+    const { title, sportName, date, place, rules, prize1, prize2, prize3, prize4, prize5 } = req.body;
+    
+    // Validate required fields
+    if (!rules) {
+      return res.status(400).json({ msg: 'Rules are required' });
+    }
+
     const prizes = {
-      '1st': prize1,
-      '2nd': prize2,
-      '3rd': prize3,
-      '4th': prize4,
-      '5th': prize5,
+      '1st': prize1 || '',
+      '2nd': prize2 || '',
+      '3rd': prize3 || '',
+      '4th': prize4 || '',
+      '5th': prize5 || '',
     };
 
-    const newEvent = new Event({
-      title,
-      sportName,
-      date,
-      place,
-      rules,
-      icon,
-      prizes,
-      poster: req.file ? `/uploads/${req.file.filename}` : '',
+    const eventData = {
+      title: title || 'Untitled Event',
+      sportName: sportName || '',
+      date: date || new Date(),
+      place: place || '',
+      rules: rules,
+      prizes: prizes,
       uploadedBy: req.user.id,
-    });
+    };
+
+    // Only add poster if file was uploaded
+    if (req.file) {
+      eventData.poster = `/uploads/${req.file.filename}`;
+    }
+
+    const newEvent = new Event(eventData);
 
     const event = await newEvent.save();
     res.json(event);

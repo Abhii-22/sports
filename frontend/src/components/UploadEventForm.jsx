@@ -68,12 +68,31 @@ const UploadEventForm = ({ addEvent, onClose }) => {
     e.preventDefault();
     setIsSubmitting(true);
 
+    // Check if required fields are filled
+    if (!formData.rules) {
+      alert('Please fill in the rules and regulations');
+      setIsSubmitting(false);
+      return;
+    }
+
     const data = new FormData();
-    Object.keys(formData).forEach(key => {
-      if (formData[key]) {
-        data.append(key, formData[key]);
-      }
+    // Handle file upload with the correct field name 'eventImage'
+    if (formData.eventImage) {
+      data.append('eventImage', formData.eventImage);
+    }
+    
+    // Append all form fields, including empty strings for required fields
+    const formFields = ['title', 'sportName', 'date', 'place', 'rules', 'prize1', 'prize2', 'prize3', 'prize4', 'prize5'];
+    
+    formFields.forEach(field => {
+      // Always include required fields, even if empty (to trigger proper validation)
+      data.append(field, formData[field] || '');
     });
+    
+    // Add timings if it exists
+    if (formData.timings) {
+      data.append('timings', formData.timings);
+    }
 
     const config = {
       headers: {
@@ -169,14 +188,16 @@ const UploadEventForm = ({ addEvent, onClose }) => {
           </div>
 
           <div className="form-group">
-            <label>Rules & Regulations</label>
+            <label>Rules & Regulations *</label>
             <textarea 
               name="rules" 
-              value={formData.rules}
+              value={formData.rules || ''}
               onChange={handleInputChange}
               placeholder="Describe the event rules..."
               rows="3"
+              required
             ></textarea>
+            <small className="form-hint">Please provide detailed rules and regulations for the event</small>
           </div>
 
           <div className="prizes-section">
