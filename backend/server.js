@@ -12,9 +12,13 @@ const PORT = process.env.PORT || 5004;
 
 // CORS Configuration
 const corsOptions = {
-  origin: 'http://localhost:3000', // Your frontend URL
+  origin: [
+    'http://localhost:3000', // Local development
+    'https://sports-eosin-one.vercel.app', // Your Vercel frontend URL
+    'https://sports-7-rikt.onrender.com' // Your Render backend URL
+  ],
   credentials: true,
-  optionsSuccessStatus: 200, // Some legacy browsers choke on 204
+  optionsSuccessStatus: 200,
   allowedHeaders: ['Content-Type', 'Authorization', 'x-auth-token']
 };
 
@@ -25,6 +29,15 @@ app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
 app.use(express.json({ limit: '200mb' }));
 app.use(express.urlencoded({ limit: '200mb', extended: true }));
+
+// Root route
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'Backend is running',
+    status: 'active',
+    timestamp: new Date().toISOString()
+  });
+});
 
 // Add cache control middleware for video files
 app.use('/uploads', (req, res, next) => {
