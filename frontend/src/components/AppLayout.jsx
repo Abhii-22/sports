@@ -6,6 +6,7 @@ import LandingPage from './LandingPage';
 import MainPage from './MainPage';
 import SignIn from './SignIn';
 import SignUp from './SignUp';
+import VerifyEmail from './VerifyEmail';
 import Events from './Events';
 import UploadEventForm from './UploadEventForm';
 import ChampionsPage from './ChampionsPage';
@@ -16,7 +17,7 @@ const AppLayout = () => {
   const location = useLocation();
   const { events, reels, addEvent, addReel, handleLike, closeUploadForm } = useApp();
   
-  const noNavRoutes = ['/', '/signin', '/signup'];
+  const noNavRoutes = ['/', '/signin', '/signup', '/verify-email'];
   const shouldShowNav = !noNavRoutes.includes(location.pathname);
 
   return (
@@ -28,6 +29,7 @@ const AppLayout = () => {
           <Route path="/home" element={<MainPage />} />
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="/events" element={<Events events={events} />} />
           <Route path="/upload" element={<UploadEventForm addEvent={addEvent} onClose={closeUploadForm} />} />
           <Route path="/reels" element={<ChampionsPage reels={reels} handleLike={handleLike} />} />

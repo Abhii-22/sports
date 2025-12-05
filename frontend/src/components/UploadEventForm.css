@@ -208,6 +208,42 @@
   border-color: rgba(255, 255, 255, 0.5);
 }
 
+.success-message {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #4CAF50;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 4px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  animation: slideDown 0.3s ease-out;
+}
+
+.success-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.success-icon {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -20px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
 .form-actions {
   display: flex;
   gap: 15px;
@@ -354,7 +390,7 @@
     flex-direction: column;
     gap: 12px;
     margin-top: auto;
-    padding: 25px 20px 30px 20px;
+    padding: 25px 20px 80px 20px; /* Increased bottom padding to 80px */
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border-top: 1px solid rgba(255, 255, 255, 0.2);
     position: relative;

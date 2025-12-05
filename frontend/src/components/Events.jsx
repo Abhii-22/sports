@@ -6,7 +6,7 @@ import {
   FaShareAlt, FaEye, FaBookmark,
   FaFlag, FaChartLine, FaBolt, FaTags,
   FaLocationArrow, FaCalendarDay, FaInfoCircle,
-  FaArrowRight, FaExpand, FaCompress, FaTh, FaList
+  FaArrowRight, FaExpand, FaCompress
 } from 'react-icons/fa';
 import './Events.css';
 import Modal from './Modal';
@@ -98,7 +98,6 @@ const Events = ({ events: initialEvents = [] }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [locationSearch, setLocationSearch] = useState('');
   const [sortBy, setSortBy] = useState('date');
-  const [viewMode, setViewMode] = useState('grid');
   const [savedEvents, setSavedEvents] = useState(new Set());
   const [hoveredCard, setHoveredCard] = useState(null);
   const [expandedCard, setExpandedCard] = useState(null);
@@ -229,24 +228,6 @@ const Events = ({ events: initialEvents = [] }) => {
                 </p>
               </div>
               
-              <div className="hero-actions">
-                <div className="view-switcher">
-                  <button 
-                    className={`view-btn ${viewMode === 'grid' ? 'active' : ''}`}
-                    onClick={() => setViewMode('grid')}
-                    title="Grid View"
-                  >
-                    <FaTh />
-                  </button>
-                  <button 
-                    className={`view-btn ${viewMode === 'list' ? 'active' : ''}`}
-                    onClick={() => setViewMode('list')}
-                    title="List View"
-                  >
-                    <FaList />
-                  </button>
-                </div>
-              </div>
             </div>
 
             {/* Event Sections Toggle Button */}
@@ -404,7 +385,7 @@ const Events = ({ events: initialEvents = [] }) => {
               </button>
             </div>
           ) : (
-            <div className={`events-grid ${viewMode}`}>
+            <div className="events-grid">
               {filteredAndSortedEvents.map((event, index) => {
                 const status = getEventStatus(event.date);
                 const isSaved = savedEvents.has(event._id);

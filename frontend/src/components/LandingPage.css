@@ -19,7 +19,18 @@
 .landing-right {
   flex: 1;
   position: relative;
-  overflow: hidden; /* Hide video overflow */
+  overflow: hidden; /* Hide overflow */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #000; /* Fallback background color */
+}
+
+.landing-right img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
 }
 
 .landing-video {
@@ -28,7 +39,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover; /* Make video cover the container */
+  object-fit: cover;
 }
 
 /* Creates the curved shape */

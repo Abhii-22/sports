@@ -10,13 +10,46 @@ dotenv.config({ path: envPath });
 const app = express();
 const PORT = process.env.PORT || 5004;
 
+// CORS Configuration
+const corsOptions = {
+  origin: 'http://localhost:3000', // Your frontend URL
+  credentials: true,
+  optionsSuccessStatus: 200, // Some legacy browsers choke on 204
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-auth-token']
+};
+
 // Middleware
-app.use(cors());
+app.use(cors(corsOptions));
+
+// Handle preflight requests
+app.options('*', cors(corsOptions));
 app.use(express.json({ limit: '200mb' }));
 app.use(express.urlencoded({ limit: '200mb', extended: true }));
 
-// Serve static files
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Add cache control middleware for video files
+app.use('/uploads', (req, res, next) => {
+  if (req.url.match(/\.(mp4|mov|avi|webm)$/)) {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+  }
+  next();
+});
+
+// Serve static files with proper MIME types
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
+  setHeaders: (res, path) => {
+    if (path.endsWith('.mp4')) {
+      res.setHeader('Content-Type', 'video/mp4');
+    } else if (path.endsWith('.mov')) {
+      res.setHeader('Content-Type', 'video/quicktime');
+    } else if (path.endsWith('.avi')) {
+      res.setHeader('Content-Type', 'video/x-msvideo');
+    } else if (path.endsWith('.webm')) {
+      res.setHeader('Content-Type', 'video/webm');
+    }
+  }
+}));
 
 // Database Connection
 if (process.env.MONGO_URI) {

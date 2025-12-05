@@ -89,6 +89,18 @@ const Profile = () => {
     }
   }, [currentUser, API]);
 
+  const getMediaUrl = (url) => {
+    if (!url) return '';
+    // If URL is already absolute, return as is
+    if (url.startsWith('http')) return url;
+    // If URL starts with /, remove the leading slash to prevent double slashes
+    if (url.startsWith('/')) {
+      return `${API}${url}`;
+    }
+    // Otherwise, assume it's a relative path
+    return `${API}/${url}`;
+  };
+
   const handleUploadSuccess = () => {
     // Refetch posts and events to show the new ones
     const fetchPosts = async (userId) => {
@@ -135,12 +147,46 @@ const Profile = () => {
   };
 
   const handleSaveProfile = (updatedProfile) => {
-    setProfileData(updatedProfile);
+    // Force re-render by creating a new object reference
+    setProfileData({
+      ...updatedProfile,
+      // Add a timestamp to the profile picture URL to force refresh
+      profilePictureUrl: updatedProfile.profilePictureUrl ? 
+        `${updatedProfile.profilePictureUrl}?t=${new Date().getTime()}` : 
+        updatedProfile.profilePictureUrl
+    });
   };
 
   const handlePostClick = (post) => {
     setSelectedPost(post);
     setShowPostModal(true);
+  };
+
+  const handleMediaError = (e, post) => {
+    console.error('Error loading media:', {
+      mediaUrl: post.mediaUrl,
+      fullUrl: getMediaUrl(post.mediaUrl),
+      mediaType: post.mediaType,
+      postId: post._id
+    });
+    
+    const target = e.target;
+    target.onerror = null; // Prevent infinite loop
+    target.style.display = 'none';
+    
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'media-error';
+    errorDiv.textContent = 'Media not available';
+    
+    // Find the parent container where we'll add the error message
+    let container = target.parentNode;
+    if (target.tagName.toLowerCase() === 'video') {
+      // If it's a video, we might be inside a container div
+      container = target.parentNode;
+    }
+    
+    // Add error message after the media element
+    container.appendChild(errorDiv);
   };
 
   const handleLikePost = async (postId) => {
@@ -230,11 +276,29 @@ const Profile = () => {
   return (
     <div className="profile-container">
       <div className="profile-header">
-        <img 
-          src={profileData.profilePictureUrl} 
-          alt="Profile" 
-          className="profile-picture" 
-        />
+        <div className="profile-picture-container">
+          {profileData.profilePictureUrl ? (
+            <img 
+              src={profileData.profilePictureUrl?.startsWith('http') 
+                ? profileData.profilePictureUrl 
+                : `${API}${profileData.profilePictureUrl}`} 
+              alt="Profile" 
+              className="profile-picture" 
+              onError={(e) => {
+                // If image fails to load, show the default avatar
+                e.target.onerror = null;
+                const defaultAvatar = document.createElement('div');
+                defaultAvatar.className = 'default-avatar';
+                defaultAvatar.textContent = profileData?.name?.charAt(0)?.toUpperCase() || 'U';
+                e.target.parentNode.replaceWith(defaultAvatar);
+              }}
+            />
+          ) : (
+            <div className="default-avatar" style={{ display: 'none' }}>
+              {profileData.name ? profileData.name.charAt(0).toUpperCase() : 'U'}
+            </div>
+          )}
+        </div>
         <div className="profile-info">
           <div className="profile-main-info">
             <h2>{profileData.name}</h2>
@@ -296,7 +360,30 @@ const Profile = () => {
                     </svg>
                   </div>
                 ) : null}
-                <img src={`${API}${post.mediaUrl}`} alt={post.title} className="event-poster" />
+                {post.mediaType && post.mediaType.startsWith('video/') ? (
+                  <div className="video-container">
+                    <video
+                      className="event-poster"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const video = e.target;
+                        video.paused ? video.play() : video.pause();
+                      }}
+                      onError={(e) => handleMediaError(e, post)}
+                      controls
+                    >
+                      <source src={getMediaUrl(post.mediaUrl)} type={post.mediaType} />
+                      Your browser does not support the video tag.
+                    </video>
+                  </div>
+                ) : (
+                  <img 
+                    src={getMediaUrl(post.mediaUrl)}
+                    alt={post.title || 'Post media'}
+                    className="event-poster"
+                    onError={(e) => handleMediaError(e, post)}
+                  />
+                )}
                 <div className="event-overlay">
                   <div className="post-info">
                     <h4>{post.title || 'Untitled'}</h4>

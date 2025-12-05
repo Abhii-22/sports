@@ -37,14 +37,34 @@ export const AuthProvider = ({ children }) => {
   const signIn = async (email, password) => {
     try {
       const res = await axios.post(`${API}/api/auth/signin`, { email, password });
-      localStorage.setItem('token', res.data.token);
-      setToken(res.data.token);
-      return { success: true };
+      
+      // Handle case where email is not verified
+      if (res.data.requiresVerification) {
+        return { 
+          success: false, 
+          requiresVerification: true,
+          email: email
+        };
+      }
+      
+      // Handle successful login with token
+      if (res.data.token) {
+        localStorage.setItem('token', res.data.token);
+        setToken(res.data.token);
+        return { success: true };
+      }
+      
+      return { 
+        success: false, 
+        error: 'Invalid response from server' 
+      };
     } catch (error) {
       console.error('Sign in error:', error);
       return { 
         success: false, 
-        error: error.response?.data?.message || 'Failed to sign in. Please try again.' 
+        error: error.response?.data?.msg || error.response?.data?.message || 'Failed to sign in. Please try again.',
+        requiresVerification: error.response?.data?.requiresVerification || false,
+        email: error.response?.data?.email
       };
     }
   };
@@ -64,13 +84,16 @@ export const AuthProvider = ({ children }) => {
         password 
       });
       
-      if (res.data && res.data.token) {
-        console.log('Signup successful:', { userId: res.data.user?.id });
-        localStorage.setItem('token', res.data.token);
-        setToken(res.data.token);
-        return { success: true };
+      if (res.data && res.data.userId) {
+        console.log('Signup successful, verification required:', { userId: res.data.userId });
+        // Return the email for verification
+        return { 
+          success: true, 
+          requiresVerification: true,
+          email: email
+        };
       } else {
-        console.error('Signup response missing token:', res.data);
+        console.error('Unexpected signup response:', res.data);
         return { 
           success: false, 
           error: 'Unexpected response from server. Please try again.' 

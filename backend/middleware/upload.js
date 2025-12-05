@@ -1,21 +1,42 @@
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
+
+// Ensure uploads directory exists
+const uploadDir = path.join(__dirname, '../uploads');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+  console.log('Uploads directory created at:', uploadDir);
+}
 
 // Set storage engine
 const storage = multer.diskStorage({
-  destination: './uploads/',
+  destination: function (req, file, cb) {
+    cb(null, uploadDir);
+  },
   filename: function (req, file, cb) {
     cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
   },
 });
 
-// Init upload
+// File filter function
+const fileFilter = function (req, file, cb) {
+  checkFileType(file, cb);
+};
+
+// Error handling for file filter
+const handleFileFilterError = function (err, req, res, next) {
+  if (err) {
+    return res.status(400).json({ msg: err });
+  }
+  next();
+};
+
+// Init upload with error handling
 const upload = multer({
   storage: storage,
   limits: { fileSize: 200000000 }, // 200MB limit
-  fileFilter: function (req, file, cb) {
-    checkFileType(file, cb);
-  },
+  fileFilter: fileFilter,
 });
 
 // Check file type

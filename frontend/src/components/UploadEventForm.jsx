@@ -7,13 +7,13 @@ const UploadEventForm = ({ addEvent, onClose }) => {
   const { token } = useAuth();
   const API = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5004';
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     sportName: '',
     place: '',
     date: '',
     timings: '',
-    rules: '',
     prize1: '',
     prize2: '',
     prize3: '',
@@ -67,13 +67,7 @@ const UploadEventForm = ({ addEvent, onClose }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-
-    // Check if required fields are filled
-    if (!formData.rules) {
-      alert('Please fill in the rules and regulations');
-      setIsSubmitting(false);
-      return;
-    }
+    setSubmitSuccess(false);
 
     const data = new FormData();
     // Handle file upload with the correct field name 'eventImage'
@@ -82,7 +76,7 @@ const UploadEventForm = ({ addEvent, onClose }) => {
     }
     
     // Append all form fields, including empty strings for required fields
-    const formFields = ['title', 'sportName', 'date', 'place', 'rules', 'prize1', 'prize2', 'prize3', 'prize4', 'prize5'];
+    const formFields = ['title', 'sportName', 'date', 'place', 'prize1', 'prize2', 'prize3', 'prize4', 'prize5'];
     
     formFields.forEach(field => {
       // Always include required fields, even if empty (to trigger proper validation)
@@ -104,7 +98,13 @@ const UploadEventForm = ({ addEvent, onClose }) => {
     try {
       const res = await axios.post(`${API}/api/events`, data, config);
       addEvent(res.data);
-      onClose();
+      setSubmitSuccess(true);
+      
+      // Hide the success message and close the form after 2 seconds
+      setTimeout(() => {
+        setSubmitSuccess(false);
+        onClose();
+      }, 2000);
     } catch (error) {
       console.error('Failed to upload event', error);
     } finally {
@@ -187,19 +187,6 @@ const UploadEventForm = ({ addEvent, onClose }) => {
             />
           </div>
 
-          <div className="form-group">
-            <label>Rules & Regulations *</label>
-            <textarea 
-              name="rules" 
-              value={formData.rules || ''}
-              onChange={handleInputChange}
-              placeholder="Describe the event rules..."
-              rows="3"
-              required
-            ></textarea>
-            <small className="form-hint">Please provide detailed rules and regulations for the event</small>
-          </div>
-
           <div className="prizes-section">
             <h4>🎁 Prize Distribution</h4>
             <div className="prizes-grid">
@@ -242,6 +229,16 @@ const UploadEventForm = ({ addEvent, onClose }) => {
               {isSubmitting ? '⏳ Creating...' : '🚀 Create Event'}
             </button>
           </div>
+          
+          {/* Success Message */}
+          {submitSuccess && (
+            <div className="success-message">
+              <div className="success-content">
+                <span className="success-icon">✓</span>
+                <span>Event Submitted successfully!</span>
+              </div>
+            </div>
+          )}
         </form>
       </div>
     </div>

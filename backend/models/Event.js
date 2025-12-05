@@ -19,7 +19,7 @@ const eventSchema = new mongoose.Schema({
   },
   rules: {
     type: String,
-    required: true,
+    default: 'No rules specified',
   },
   icon: {
     type: String,

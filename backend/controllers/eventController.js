@@ -3,12 +3,8 @@ const Event = require('../models/Event');
 // Create a new event
 exports.createEvent = async (req, res) => {
   try {
-    const { title, sportName, date, place, rules, prize1, prize2, prize3, prize4, prize5 } = req.body;
-    
-    // Validate required fields
-    if (!rules) {
-      return res.status(400).json({ msg: 'Rules are required' });
-    }
+    const { title, sportName, date, place, prize1, prize2, prize3, prize4, prize5 } = req.body;
+    const rules = req.body.rules || 'No rules specified';
 
     const prizes = {
       '1st': prize1 || '',

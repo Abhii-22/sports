@@ -15,6 +15,12 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  isEmailVerified: {
+    type: Boolean,
+    default: false,
+  },
+  emailVerificationOtp: String,
+  emailVerificationOtpExpiry: Date,
   bio: {
     type: String,
     default: 'Welcome to my profile!',

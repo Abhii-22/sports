@@ -43,6 +43,16 @@ const SignUp = () => {
       console.log('Attempting to sign up with:', { name, email });
       const result = await signUp(name, email, password);
       
+      if (result && result.requiresVerification) {
+        console.log('Email verification required, redirecting...');
+        // Navigate to verification page with email
+        navigate('/verify-email', { 
+          state: { email: result.email },
+          replace: true
+        });
+        return;
+      }
+      
       if (result && result.success) {
         console.log('Signup successful, navigating to home...');
         // Clear any previous errors

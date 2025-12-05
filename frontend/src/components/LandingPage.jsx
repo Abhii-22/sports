@@ -16,10 +16,7 @@ const LandingPage = () => {
         </div>
       </div>
       <div className="landing-right">
-        <video autoPlay loop muted playsInline className="landing-video">
-          <source src="https://assets.mixkit.co/videos/preview/mixkit-basketball-player-dribbling-then-running-2285-large.mp4" type="video/mp4" />
-          Your browser does not support the video tag.
-        </video>
+        <img src="/images/landing.jpg" alt="landing" />
       </div>
     </div>
   );

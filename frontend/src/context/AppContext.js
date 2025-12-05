@@ -100,38 +100,78 @@ export const AppProvider = ({ children }) => {
   };
 
   const handleLike = async (reelId) => {
+    // Store the current reel in a variable that won't change during the async operation
+    const currentReel = reels.find(reel => reel.id === reelId);
+    if (!currentReel) {
+      console.error('Reel not found:', reelId);
+      return;
+    }
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.error('No authentication token found');
+      return;
+    }
+
+    // Optimistically update the UI
+    const optimisticLiked = !currentReel.liked;
+    const optimisticLikes = optimisticLiked ? currentReel.likes + 1 : currentReel.likes - 1;
+    
+    setReels(prevReels => prevReels.map(reel => 
+      reel.id === reelId 
+        ? { ...reel, liked: optimisticLiked, likes: optimisticLikes }
+        : reel
+    ));
+
     try {
-      const currentReel = reels.find(reel => reel.id === reelId);
-      if (!currentReel) return;
-
-      const endpoint = currentReel.liked ? 'unlike' : 'like';
-      const response = await axios.put(`${API}/api/posts/${reelId}/${endpoint}`, {}, {
-        headers: {
-          'x-auth-token': localStorage.getItem('token')
+      const endpoint = optimisticLiked ? 'like' : 'unlike';
+      console.log(`Sending ${endpoint} request for post ${reelId}`);
+      
+      const response = await axios.put(
+        `${API}/api/posts/${reelId}/${endpoint}`, 
+        {},
+        {
+          headers: {
+            'x-auth-token': token,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          withCredentials: true
         }
-      });
+      );
 
-      setReels(reels.map(reel => {
-        if (reel.id === reelId) {
-          return { 
-            ...reel, 
-            liked: response.data.liked, 
-            likes: response.data.likes 
-          };
-        }
-        return reel;
-      }));
+      console.log('Like/Unlike response:', response.data);
+      
+      // Update with server response
+      setReels(prevReels => prevReels.map(reel => 
+        reel.id === reelId 
+          ? { ...reel, liked: response.data.liked, likes: response.data.likes }
+          : reel
+      ));
     } catch (error) {
-      console.error('Failed to like/unlike post:', error);
-      setReels(reels.map(reel => {
-        if (reel.id === reelId) {
-          return { ...reel, liked: !reel.liked, likes: reel.liked ? reel.likes - 1 : reel.likes + 1 };
-        }
-        return reel;
-      }));
+      console.error('Failed to like/unlike post:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      });
+      
+      // Revert optimistic update on error
+      if (error.response?.status === 400) {
+        console.error('Bad request - possible invalid post ID or user already liked/unliked');
+      } else if (error.response?.status === 401 || error.response?.status === 403) {
+        console.error('Authentication error - please login again');
+      } else {
+        console.error('Server error - please try again later');
+      }
+      
+      // Revert to previous state on error
+      setReels(prevReels => prevReels.map(reel => 
+        reel.id === reelId 
+          ? { ...reel, liked: !optimisticLiked, likes: optimisticLiked ? reel.likes - 1 : reel.likes + 1 }
+          : reel
+      ));
     }
   };
-
 
   const toggleUploadForm = () => {
     setShowUploadForm(prev => !prev);
