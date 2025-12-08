@@ -1,0 +1,37 @@
+.bottom-nav {
+  display: none; /* Hidden by default, shown on mobile via media query */
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: #000;
+  color: #fff;
+  justify-content: space-around;
+  align-items: center; /* Vertically center icons */
+  padding: 10px 0;
+  z-index: 9999; /* Ensure it's on top of everything */
+  height: 60px; /* Give the nav bar a fixed height */
+}
+
+.nav-item {
+  font-size: 24px;
+  color: #fff;
+  text-decoration: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  height: 100%;
+  transition: color 0.2s ease-in-out;
+}
+
+.nav-item:hover {
+  color: #61dafb; /* Add a hover effect for better UX */
+}
+
+@media (max-width: 768px) {
+  .bottom-nav {
+    display: flex; /* Shown on mobile */
+  }
+}

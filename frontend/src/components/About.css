@@ -1,0 +1,267 @@
+/* ===============================
+   ABOUT TIMELINE – FULL FINAL VERSION
+   =============================== */
+
+/* Main Container */
+.about-timeline-container {
+  background-color: #fff;
+  padding: 80px 20px;
+  color: #333;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+}
+
+.about-timeline-header {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.about-timeline-header h1 {
+  font-size: 2.8rem;
+  margin-bottom: 8px;
+  color: #222;
+}
+
+.about-timeline-header p {
+  font-size: 1.05rem;
+  color: #666;
+}
+
+/* ===============================
+   DESKTOP / LAPTOP VIEW
+   =============================== */
+.timeline {
+  position: relative;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 10px 0;
+}
+
+/* Center vertical line */
+.timeline::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 100%;
+  background-color: #e6e6e6;
+  z-index: 1;
+}
+
+/* Timeline item wrapper */
+.timeline-item {
+  position: relative;
+  width: 100%;
+  margin-bottom: 50px;
+  box-sizing: border-box;
+  clear: both;
+}
+
+.timeline-item::after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+/* Card content */
+.timeline-content {
+  width: 45%;
+  padding: 22px 28px;
+  background-color: #f4f7f6;
+  border-radius: 10px;
+  position: relative;
+  box-sizing: border-box;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.timeline-item.is-visible .timeline-content {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Odd items on left */
+.timeline-item:nth-child(odd) .timeline-content {
+  float: left;
+  margin-right: 55%;
+  text-align: right;
+}
+
+/* Even items on right */
+.timeline-item:nth-child(even) .timeline-content {
+  float: right;
+  margin-left: 55%;
+  text-align: left;
+}
+
+/* Center icons */
+.timeline-icon {
+  position: absolute;
+  top: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: #61dafb;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  z-index: 2;
+  border: 3px solid #fff;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+}
+
+/* Card text styles */
+.timeline-date {
+  display: inline-block;
+  font-weight: 700;
+  color: #61dafb;
+  margin-bottom: 8px;
+}
+
+.timeline-content h3 {
+  font-size: 1.6rem;
+  margin: 6px 0 12px;
+  color: #222;
+}
+
+.timeline-content p {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #444;
+}
+
+/* Larger spacing for wide screens */
+@media (min-width: 1100px) {
+  .timeline-item { margin-bottom: 70px; }
+  .timeline-content { padding: 26px 32px; }
+}
+
+/* ===============================
+   MOBILE VIEW (MODERN REDESIGN)
+   =============================== */
+@media (max-width: 768px) {
+  .about-timeline-container {
+    padding: 60px 16px;
+    background: linear-gradient(180deg, #f0faff 0%, #ffffff 100%);
+  }
+
+  .about-timeline-header h1 {
+    font-size: 2rem;
+    color: #0b3d91;
+  }
+
+  .about-timeline-header p {
+    font-size: 1rem;
+    color: #333;
+  }
+
+  /* Remove center line */
+  .timeline::after {
+    display: none;
+  }
+
+  /* Stack vertically */
+  .timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    padding: 0 10px;
+  }
+
+  /* Each timeline item */
+  .timeline-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    position: relative;
+    opacity: 0;
+    transform: translateY(25px);
+    transition: all 0.6s ease;
+  }
+
+  .timeline-item.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Vertical glowing line */
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: 22px;
+    top: 0;
+    width: 2px;
+    height: 100%;
+    background: linear-gradient(180deg, #61dafb, transparent);
+    z-index: 0;
+  }
+
+  /* Icon beside each card */
+  .timeline-icon {
+    position: relative;
+    flex-shrink: 0;
+    left: auto;
+    transform: none;
+    top: auto;
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #61dafb, #0077b6);
+    box-shadow: 0 0 15px rgba(97, 218, 251, 0.6);
+    font-size: 1.6rem;
+  }
+
+  /* Card beside icon */
+  .timeline-content {
+    flex: 1;
+    width: auto;
+    background: linear-gradient(135deg, #fdfbfb, #ebedee);
+    border-radius: 14px;
+    padding: 18px 20px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+    border-left: 4px solid #61dafb;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  /* Hover effect */
+  .timeline-content:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 22px rgba(0,0,0,0.1);
+  }
+
+  /* Date and text */
+  .timeline-date {
+    font-weight: 700;
+    color: #0077b6;
+    font-size: 0.9rem;
+    margin-bottom: 6px;
+    display: block;
+  }
+
+  .timeline-content h3 {
+    font-size: 1.2rem;
+    color: #111;
+    margin: 4px 0 8px;
+    font-weight: 600;
+  }
+
+  .timeline-content p {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: #333;
+  }
+
+  /* Remove left-right float */
+  .timeline-item:nth-child(odd) .timeline-content,
+  .timeline-item:nth-child(even) .timeline-content {
+    float: none;
+    margin: 0;
+    text-align: left;
+  }
+}

@@ -1,0 +1,157 @@
+/* General Styles */
+.landing-container {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+}
+
+.landing-left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  background-color: #222222; /* Softer dark color */
+  color: #fff;
+}
+
+.landing-right {
+  flex: 1;
+  position: relative;
+  overflow: hidden; /* Hide overflow */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #000; /* Fallback background color */
+}
+
+.landing-right img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.landing-video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Creates the curved shape */
+.landing-right::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -50px; /* Adjust to control the curve's depth */
+  width: 100px;
+  height: 100%;
+  background-color: #222222; /* Match the left panel's color */
+  border-radius: 50%;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.landing-content {
+  text-align: center;
+  max-width: 500px;
+}
+
+.landing-content h1 {
+  font-size: 3.5rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.landing-content p {
+  font-size: 1.2rem;
+  margin-bottom: 40px;
+  line-height: 1.6;
+}
+
+.landing-cta {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.cta-button {
+  padding: 15px 35px;
+  border-radius: 50px;
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.cta-button.primary {
+  background-color: #00aaff;
+  color: #fff;
+}
+
+.cta-button.primary:hover {
+  background-color: #0088cc;
+}
+
+.cta-button.secondary {
+  background-color: #333;
+  color: #fff;
+}
+
+.cta-button.secondary:hover {
+  background-color: #444;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .landing-container {
+    flex-direction: column;
+    height: 100vh; /* Ensure full viewport height */
+  }
+
+  .landing-left {
+    order: 1; /* Place content at the top */
+    padding: 20px;
+    flex: 1; /* Allow content to fill available space */
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Center content vertically */
+  }
+
+  .landing-right {
+    display: block; /* Ensure the image is visible */
+    order: 2; /* Place image at the bottom */
+    flex: 0 0 250px; /* Set a fixed height for the image banner */
+    width: 100%;
+  }
+
+  /* Hide the curve on mobile as it won't fit the layout */
+  .landing-right::before {
+    display: none;
+  }
+
+  .landing-content h1 {
+    font-size: 2.5rem;
+  }
+
+  .landing-content p {
+    font-size: 1rem;
+    margin-bottom: 30px;
+  }
+
+  .landing-cta {
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .cta-button {
+    width: 100%;
+    max-width: 320px;
+    padding: 15px;
+  }
+}

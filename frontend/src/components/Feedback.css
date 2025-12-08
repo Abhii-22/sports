@@ -1,0 +1,101 @@
+.feedback-section {
+  background: linear-gradient(135deg, #0a0f1f, #13294b);
+  color: #fff;
+  text-align: center;
+  padding: 80px 20px;
+  font-family: "Poppins", sans-serif;
+  overflow: hidden;
+}
+
+.feedback-section h2 {
+  font-size: 2.5rem;
+  margin-bottom: 3rem;
+  color: #00bfff;
+  font-weight: 600;
+}
+
+.feedback-row {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.feedback-card {
+  width: 300px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 18px;
+  padding: 1.8rem;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  min-height: 160px;
+  transition: all 0.3s ease;
+}
+
+.feedback-text {
+  font-size: 1rem;
+  line-height: 1.6;
+  font-style: italic;
+  color: #e6e6e6;
+  margin-bottom: 1rem;
+}
+
+.feedback-name {
+  color: #00d4ff;
+  font-weight: 600;
+}
+
+.cursor {
+  display: inline-block;
+  width: 10px;
+  height: 1rem;
+  background-color: #00d4ff;
+  margin-left: 4px;
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* Stats Section */
+.stats-section {
+  margin-top: 70px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 40px;
+  border-radius: 20px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.15);
+}
+
+.stats-section h3 {
+  color: #00d4ff;
+  font-size: 1.8rem;
+  margin-bottom: 10px;
+}
+
+.stats-section p {
+  color: #ccc;
+  font-size: 1.1rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .feedback-row {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .feedback-card {
+    width: 90%;
+  }
+
+  .feedback-section h2 {
+    font-size: 2rem;
+  }
+
+}
