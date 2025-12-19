@@ -1,33 +1,12 @@
-const nodemailer = require('nodemailer');
+const sgMail = require('@sendgrid/mail');
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '..', '.env') });
 
-// Always use Gmail SMTP for both development and production
-const createTransporter = () => {
-  return nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 587,
-    secure: false, // use TLS
-    requireTLS: true,
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASSWORD // IMPORTANT: Use Gmail App Password here
-    }
-  });
-};
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-const transporter = createTransporter();
+console.log('✅ SendGrid is configured.');
 
-// Verify connection configuration
-transporter.verify((error) => {
-  if (error) {
-    console.error('❌ Email server connection failed:', error);
-  } else {
-    console.log('✅ Email server is ready (Gmail SMTP)');
-  }
-});
-
-// Get the sender email
+// Get the sender email (must be a verified sender in SendGrid)
 const getSenderEmail = () => {
   return process.env.EMAIL_USER;
 };
@@ -38,20 +17,23 @@ const getSenderName = () => {
 };
 
 /**
- * Sends a verification email with OTP
+ * Sends a verification email with OTP using SendGrid
  */
-const sendVerificationEmail = async (email, otp, attempt = 1, maxAttempts = 3) => {
+const sendVerificationEmail = async (email, otp) => {
   const senderEmail = getSenderEmail();
   const senderName = getSenderName();
-  
-  if (!senderEmail) {
-    console.error('❌ No sender email configured');
+
+  if (!process.env.SENDGRID_API_KEY || !senderEmail) {
+    console.error('❌ SendGrid API Key or Sender Email is not configured.');
     return false;
   }
 
-  const mailOptions = {
-    from: `"${senderName}" <${senderEmail}>`,
+  const msg = {
     to: email,
+    from: {
+      name: senderName,
+      email: senderEmail,
+    },
     subject: 'Verify Your Email Address',
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -68,42 +50,19 @@ const sendVerificationEmail = async (email, otp, attempt = 1, maxAttempts = 3) =
   };
 
   try {
-    console.log(`📨 Sending verification email to ${email} from ${senderEmail} (Attempt ${attempt}/${maxAttempts})`);
-    
-    const info = await transporter.sendMail(mailOptions);
-    console.log('📧 Message sent: %s', info.messageId);
+    console.log(`📨 Sending verification email to ${email} via SendGrid...`);
+    await sgMail.send(msg);
     console.log(`✅ Verification email sent to ${email}`);
     return true;
-    
   } catch (error) {
-    console.error(`❌ Email send error (Attempt ${attempt}):`, {
-      to: email,
-      from: senderEmail,
-      error: error.message,
-      code: error.code,
-      response: error.response
-    });
-
-    // If the error is about sender verification, don't retry
-    if (error.message.includes('sender identity') || error.message.includes('550')) {
-      console.error('❌ Sender email verification required. Please verify your sender email in SendGrid.');
-      return false;
+    console.error('❌ SendGrid send error:', error.toString());
+    if (error.response) {
+      console.error(error.response.body);
     }
-
-    // Retry logic with exponential backoff
-    if (attempt < maxAttempts) {
-      const delay = Math.pow(2, attempt) * 1000; // Exponential backoff
-      console.log(`🔄 Retrying in ${delay/1000} seconds...`);
-      await new Promise(resolve => setTimeout(resolve, delay));
-      return sendVerificationEmail(email, otp, attempt + 1, maxAttempts);
-    }
-
-    console.error(`❌ Failed to send verification email to ${email} after ${maxAttempts} attempts`);
     return false;
   }
 };
 
 module.exports = {
   sendVerificationEmail,
-  getSenderEmail // Export for testing
 };
