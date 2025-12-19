@@ -11,12 +11,29 @@ const app = express();
 const PORT = process.env.PORT || 5004;
 
 // CORS Configuration
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://sports-eosin-one.vercel.app',
+  'https://sports-7-rikt.onrender.com'
+];
+
 const corsOptions = {
-  origin: [
-    'http://localhost:3000', // Local development
-    'https://sports-eosin-one.vercel.app', // Your Vercel frontend URL
-    'https://sports-7-rikt.onrender.com' // Your Render backend URL
-  ],
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+
+    // Allow from main domains
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      return callback(null, true);
+    }
+
+    // Allow from Vercel preview deployments
+    if (/\.vercel\.app$/.test(origin)) {
+      return callback(null, true);
+    }
+
+    callback(new Error('Not allowed by CORS'));
+  },
   credentials: true,
   optionsSuccessStatus: 200,
   allowedHeaders: ['Content-Type', 'Authorization', 'x-auth-token']
