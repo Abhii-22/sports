@@ -12,9 +12,7 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem('token'));
   
   // Use the environment variable if it exists, otherwise use the current host with port 5004 for development
-  const API = process.env.NODE_ENV === 'production' 
-    ? process.env.REACT_APP_API_BASE_URL 
-    : process.env.REACT_APP_API_BASE_URL || 'http://localhost:5004';
+  const API = process.env.REACT_APP_API_URL || 'http://localhost:5004';
 
   useEffect(() => {
     const loadUser = async () => {
