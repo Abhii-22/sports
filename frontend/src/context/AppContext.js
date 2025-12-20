@@ -11,7 +11,7 @@ export const useApp = () => {
   return context;
 };
 
-const API = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5004';
+const API = process.env.REACT_APP_API_URL || 'http://localhost:5004';
 
 export const AppProvider = ({ children }) => {
   const [showUploadForm, setShowUploadForm] = useState(false);
