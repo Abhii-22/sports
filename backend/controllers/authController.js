@@ -126,7 +126,11 @@ exports.verifyEmail = async (req, res) => {
       return res.status(400).json({ msg: 'Email already verified' });
     }
 
-    if (user.emailVerificationOtp !== otp) {
+    // Log received and stored OTPs for debugging
+    console.log(`Verifying OTP for ${email}. Received: '${otp}' (type: ${typeof otp}), Stored: '${user.emailVerificationOtp}' (type: ${typeof user.emailVerificationOtp})`);
+
+    // Compare OTPs as strings to avoid type issues
+    if (String(user.emailVerificationOtp) !== String(otp)) {
       return res.status(400).json({ msg: 'Invalid OTP' });
     }
 
