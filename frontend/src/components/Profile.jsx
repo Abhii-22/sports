@@ -11,7 +11,7 @@ const Profile = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedPost, setSelectedPost] = useState(null);
   const [showPostModal, setShowPostModal] = useState(false);
-  const [profileData, setProfileData] = useState(null);
+  const [profileData, setProfileData] = useState(currentUser);
   const [posts, setPosts] = useState([]);
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -22,71 +22,62 @@ const Profile = () => {
     events: 0,
     totalLikes: 0
   });
-  const API = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5004'; // Force API URL to port 5004
+  const API = process.env.REACT_APP_API_URL || 'http://localhost:5004';
 
   useEffect(() => {
-    const fetchPosts = async (userId) => {
-      try {
-        const res = await axios.get(`${API}/api/posts/user/${userId}`);
-        // Add liked status to each post
-        const postsWithLikedStatus = res.data.map(post => ({
-          ...post,
-          liked: (currentUser && post.likedBy?.some(likedUser => 
-            (likedUser._id === currentUser._id) || (likedUser.toString() === currentUser._id)
-          )) || false
-        }));
-        setPosts(postsWithLikedStatus);
-        // Update stats
-        setStats(prev => ({
-          ...prev,
-          posts: res.data.length,
-          totalLikes: res.data.reduce((acc, post) => acc + (post.likes || 0), 0)
-        }));
-      } catch (error) {
-        console.error('Failed to load posts', error);
-        setError('Failed to load posts');
+    const fetchData = async () => {
+      if (!currentUser) {
+        setLoading(false);
+        setError('Please log in to view your profile.');
+        return;
       }
-    };
 
-    const fetchEvents = async (userId) => {
-      try {
-        const res = await axios.get(`${API}/api/events/user/${userId}`);
-        setEvents(res.data);
-        // Update stats
-        setStats(prev => ({
-          ...prev,
-          events: res.data.length
-        }));
-      } catch (error) {
-        console.error('Failed to load events', error);
-        setError('Failed to load events');
-      }
-    };
-
-    const fetchProfile = async () => {
       try {
         setLoading(true);
         setError(null);
-        const res = await axios.get(`${API}/api/profile/me`);
-        setProfileData(res.data);
-        await Promise.all([
-          fetchPosts(res.data._id),
-          fetchEvents(res.data._id)
+        setProfileData(currentUser);
+
+        const fetchPosts = async (userId) => {
+          const res = await axios.get(`${API}/api/posts/user/${userId}`);
+          const postsWithLikedStatus = res.data.map(post => ({
+            ...post,
+            liked: (currentUser && post.likedBy?.some(likedUser => 
+              (likedUser._id === currentUser._id) || (likedUser.toString() === currentUser._id)
+            )) || false
+          }));
+          setPosts(postsWithLikedStatus);
+          return { 
+            postsCount: res.data.length, 
+            likesCount: res.data.reduce((acc, post) => acc + (post.likes || 0), 0)
+          };
+        };
+
+        const fetchEvents = async (userId) => {
+          const res = await axios.get(`${API}/api/events/user/${userId}`);
+          setEvents(res.data);
+          return { eventsCount: res.data.length };
+        };
+
+        const [postStats, eventStats] = await Promise.all([
+          fetchPosts(currentUser._id),
+          fetchEvents(currentUser._id)
         ]);
-      } catch (error) {
-        console.error('Failed to fetch profile', error);
-        setError('Failed to load profile data');
+
+        setStats({
+          posts: postStats.postsCount,
+          events: eventStats.eventsCount,
+          totalLikes: postStats.likesCount
+        });
+
+      } catch (err) {
+        console.error('Failed to fetch profile data:', err);
+        setError('Failed to load profile data. Please try again.');
       } finally {
         setLoading(false);
       }
     };
 
-    if (currentUser) {
-      fetchProfile();
-    } else {
-      setLoading(false);
-      setError('Please log in to view your profile');
-    }
+    fetchData();
   }, [currentUser, API]);
 
   const getMediaUrl = (url) => {
