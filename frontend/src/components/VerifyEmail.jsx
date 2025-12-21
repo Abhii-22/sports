@@ -3,6 +3,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import './VerifyEmail.css';
 
+const API = process.env.REACT_APP_API_URL || 'http://localhost:5004';
+
 const VerifyEmail = () => {
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [error, setError] = useState('');
@@ -57,7 +59,7 @@ const VerifyEmail = () => {
     setIsLoading(true);
     
     try {
-      const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:5004'}/api/auth/verify-email`, {
+      const response = await axios.post(`${API}/api/auth/verify-email`, {
         email,
         otp: otpValue
       });
@@ -83,7 +85,7 @@ const VerifyEmail = () => {
     setIsLoading(true);
     
     try {
-      await axios.post(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:5004'}/api/auth/resend-verification`, {
+      await axios.post(`${API}/api/auth/resend-verification`, {
         email
       });
       
