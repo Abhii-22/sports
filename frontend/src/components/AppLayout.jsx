@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import Header from './Header';
 import BottomNav from './BottomNav';
@@ -16,6 +16,19 @@ import { useApp } from '../context/AppContext';
 const AppLayout = () => {
   const location = useLocation();
   const { events, reels, addEvent, addReel, handleLike, closeUploadForm } = useApp();
+  
+  // Scroll to top on route change (except for reels page which has its own scroll)
+  useEffect(() => {
+    if (location.pathname !== '/reels') {
+      window.scrollTo({
+        top: 0,
+        left: 0,
+        behavior: 'instant'
+      });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    }
+  }, [location.pathname]);
   
   const noNavRoutes = ['/', '/signin', '/signup', '/verify-email'];
   const shouldShowNav = !noNavRoutes.includes(location.pathname);

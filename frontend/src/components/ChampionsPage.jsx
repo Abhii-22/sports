@@ -156,7 +156,9 @@ const ChampionsPage = ({ reels, handleLike }) => {
                 </button>
               </div>
             ) : (
-              <img src={reel.src} alt="Reel content" className="reel-media" />
+              <div className="video-container">
+                <img src={reel.src} alt="Reel content" className="reel-media" />
+              </div>
             )}
             <div className="reel-user-profile">
               <img 

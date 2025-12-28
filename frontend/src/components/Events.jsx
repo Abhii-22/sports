@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { 
   FaCalendarAlt, FaTrophy, 
   FaSearch,
@@ -31,9 +32,22 @@ const prizeIcons = {
 
 const Events = ({ events: initialEvents = [] }) => {
   const [eventsList, setEventsList] = useState(initialEvents);
+  const location = useLocation();
+
+  // Scroll to top when Events page is mounted or route changes to /events
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'instant' // Use 'instant' for immediate scroll without animation
+    });
+    // Also scroll the document element for better compatibility
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }, [location.pathname]);
 
   // Update events list when the initialEvents prop changes
-  React.useEffect(() => {
+  useEffect(() => {
     setEventsList(initialEvents);
   }, [initialEvents]);
 
