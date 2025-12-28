@@ -35,12 +35,27 @@ export const AppProvider = ({ children }) => {
       }
     };
 
+    const getMediaUrl = (url) => {
+      if (!url) return '';
+      // If URL is already absolute, return as is
+      if (url.startsWith('http://') || url.startsWith('https://')) return url;
+      // If URL starts with /, append to API base URL
+      if (url.startsWith('/')) {
+        // Remove trailing slash from API if present to avoid double slashes
+        const apiBase = API.endsWith('/') ? API.slice(0, -1) : API;
+        return `${apiBase}${url}`;
+      }
+      // Otherwise, assume it's a relative path
+      const apiBase = API.endsWith('/') ? API.slice(0, -1) : API;
+      return `${apiBase}/${url}`;
+    };
+
     const fetchAllPosts = async () => {
       try {
         const res = await axios.get(`${API}/api/posts`);
         const transformedReels = res.data.map(post => ({
           id: post._id,
-          src: `${API}${post.mediaUrl}`,
+          src: getMediaUrl(post.mediaUrl),
           type: post.mediaType,
           likes: post.likes || 0,
           liked: ((currentUser) && (post.likedBy?.some(likedUser => 

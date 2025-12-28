@@ -56,8 +56,13 @@ app.get('/', (req, res) => {
   });
 });
 
-// Add cache control middleware for video files
+// Add cache control middleware for video files and CORS headers for all uploads
 app.use('/uploads', (req, res, next) => {
+  // Add CORS headers for static files
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  
   if (req.url.match(/\.(mp4|mov|avi|webm)$/)) {
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     res.setHeader('Pragma', 'no-cache');
@@ -68,15 +73,22 @@ app.use('/uploads', (req, res, next) => {
 
 // Serve static files with proper MIME types
 app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
-  setHeaders: (res, path) => {
-    if (path.endsWith('.mp4')) {
+  setHeaders: (res, filePath) => {
+    // Set proper content type based on file extension
+    if (filePath.endsWith('.mp4')) {
       res.setHeader('Content-Type', 'video/mp4');
-    } else if (path.endsWith('.mov')) {
+    } else if (filePath.endsWith('.mov')) {
       res.setHeader('Content-Type', 'video/quicktime');
-    } else if (path.endsWith('.avi')) {
+    } else if (filePath.endsWith('.avi')) {
       res.setHeader('Content-Type', 'video/x-msvideo');
-    } else if (path.endsWith('.webm')) {
+    } else if (filePath.endsWith('.webm')) {
       res.setHeader('Content-Type', 'video/webm');
+    } else if (filePath.match(/\.(jpg|jpeg)$/i)) {
+      res.setHeader('Content-Type', 'image/jpeg');
+    } else if (filePath.endsWith('.png')) {
+      res.setHeader('Content-Type', 'image/png');
+    } else if (filePath.endsWith('.gif')) {
+      res.setHeader('Content-Type', 'image/gif');
     }
   }
 }));

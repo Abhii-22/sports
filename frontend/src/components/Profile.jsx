@@ -83,13 +83,16 @@ const Profile = () => {
   const getMediaUrl = (url) => {
     if (!url) return '';
     // If URL is already absolute, return as is
-    if (url.startsWith('http')) return url;
-    // If URL starts with /, remove the leading slash to prevent double slashes
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    // If URL starts with /, append to API base URL
     if (url.startsWith('/')) {
-      return `${API}${url}`;
+      // Remove trailing slash from API if present to avoid double slashes
+      const apiBase = API.endsWith('/') ? API.slice(0, -1) : API;
+      return `${apiBase}${url}`;
     }
     // Otherwise, assume it's a relative path
-    return `${API}/${url}`;
+    const apiBase = API.endsWith('/') ? API.slice(0, -1) : API;
+    return `${apiBase}/${url}`;
   };
 
   const handleUploadSuccess = () => {
@@ -129,12 +132,21 @@ const Profile = () => {
     };
 
     if (currentUser) {
+      // Wait for posts to be fetched before closing modal
       Promise.all([
         fetchPosts(currentUser._id),
         fetchEvents(currentUser._id)
-      ]);
+      ]).then(() => {
+        // Small delay to ensure state updates are reflected
+        setTimeout(() => {
+          setShowUploadModal(false);
+        }, 100);
+      }).catch(() => {
+        setShowUploadModal(false);
+      });
+    } else {
+      setShowUploadModal(false);
     }
-    setShowUploadModal(false);
   };
 
   const handleSaveProfile = (updatedProfile) => {
@@ -154,30 +166,40 @@ const Profile = () => {
   };
 
   const handleMediaError = (e, post) => {
+    const fullUrl = getMediaUrl(post.mediaUrl);
     console.error('Error loading media:', {
       mediaUrl: post.mediaUrl,
-      fullUrl: getMediaUrl(post.mediaUrl),
+      fullUrl: fullUrl,
       mediaType: post.mediaType,
-      postId: post._id
+      postId: post._id,
+      apiUrl: API
     });
     
     const target = e.target;
     target.onerror = null; // Prevent infinite loop
-    target.style.display = 'none';
     
+    // Hide the media element
+    if (target.tagName.toLowerCase() === 'img') {
+      target.style.display = 'none';
+    } else if (target.tagName.toLowerCase() === 'video') {
+      target.style.display = 'none';
+    }
+    
+    // Check if error div already exists to avoid duplicates
+    const parent = target.parentNode;
+    const existingError = parent.querySelector('.media-error');
+    if (existingError) {
+      return;
+    }
+    
+    // Create error message
     const errorDiv = document.createElement('div');
     errorDiv.className = 'media-error';
     errorDiv.textContent = 'Media not available';
+    errorDiv.style.cssText = 'display: flex; align-items: center; justify-content: center; min-height: 200px; color: #999; background: #f5f5f5; border-radius: 8px;';
     
-    // Find the parent container where we'll add the error message
-    let container = target.parentNode;
-    if (target.tagName.toLowerCase() === 'video') {
-      // If it's a video, we might be inside a container div
-      container = target.parentNode;
-    }
-    
-    // Add error message after the media element
-    container.appendChild(errorDiv);
+    // Insert error message in place of the media element
+    parent.insertBefore(errorDiv, target.nextSibling);
   };
 
   const handleLikePost = async (postId) => {
@@ -457,13 +479,38 @@ const Profile = () => {
                 {selectedPost.mediaType ? (
                   // It's a post
                   selectedPost.mediaType.startsWith('video/') ? (
-                    <video src={`${API}${selectedPost.mediaUrl}`} controls autoPlay className="modal-video" />
+                    <video 
+                      src={getMediaUrl(selectedPost.mediaUrl)} 
+                      controls 
+                      autoPlay 
+                      className="modal-video"
+                      onError={(e) => {
+                        console.error('Error loading video in modal:', selectedPost.mediaUrl);
+                        e.target.style.display = 'none';
+                      }}
+                    />
                   ) : (
-                    <img src={`${API}${selectedPost.mediaUrl}`} alt={selectedPost.title} className="modal-image" />
+                    <img 
+                      src={getMediaUrl(selectedPost.mediaUrl)} 
+                      alt={selectedPost.title} 
+                      className="modal-image"
+                      onError={(e) => {
+                        console.error('Error loading image in modal:', selectedPost.mediaUrl);
+                        e.target.style.display = 'none';
+                      }}
+                    />
                   )
                 ) : (
                   // It's an event
-                  <img src={`${API}${selectedPost.poster}`} alt={selectedPost.title} className="modal-image" />
+                  <img 
+                    src={getMediaUrl(selectedPost.poster)} 
+                    alt={selectedPost.title} 
+                    className="modal-image"
+                    onError={(e) => {
+                      console.error('Error loading event poster in modal:', selectedPost.poster);
+                      e.target.style.display = 'none';
+                    }}
+                  />
                 )}
               </div>
               <div className="post-details">

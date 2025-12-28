@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import './UploadModal.css';
-const API = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5004';
+const API = process.env.REACT_APP_API_URL || 'http://localhost:5004';
 
 const UploadModal = ({ onClose, onUploadSuccess }) => {
   const [file, setFile] = useState(null);
   const [title, setTitle] = useState('');
   const [error, setError] = useState('');
+  const [uploading, setUploading] = useState(false);
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
@@ -23,16 +24,36 @@ const UploadModal = ({ onClose, onUploadSuccess }) => {
       formData.append('title', title);
 
       try {
-        await axios.post(`${API}/api/posts`, formData, {
+        setUploading(true);
+        setError('');
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+          setError('Please log in to upload posts.');
+          setUploading(false);
+          return;
+        }
+
+        const response = await axios.post(`${API}/api/posts`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
+            'x-auth-token': token,
           },
         });
-        onUploadSuccess();
-        onClose();
+        
+        // Verify the response contains valid post data
+        if (response.data && response.data._id) {
+          console.log('Post uploaded successfully:', response.data);
+          onUploadSuccess();
+          onClose();
+        } else {
+          throw new Error('Invalid response from server');
+        }
       } catch (err) {
         console.error('Failed to upload post', err);
-        setError('Upload failed. Please try again.');
+        setError(err.response?.data?.msg || 'Upload failed. Please try again.');
+      } finally {
+        setUploading(false);
       }
     }
   };

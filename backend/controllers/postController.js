@@ -1,5 +1,7 @@
 const Post = require('../models/Post');
 const User = require('../models/User');
+const fs = require('fs');
+const path = require('path');
 
 // Create a new post
 exports.createPost = async (req, res) => {
@@ -8,18 +10,49 @@ exports.createPost = async (req, res) => {
       return res.status(400).json({ msg: 'Please upload a file' });
     }
 
+    // Verify the file actually exists on disk
+    const filePath = path.join(__dirname, '../uploads', req.file.filename);
+    if (!fs.existsSync(filePath)) {
+      console.error('File was not saved properly:', filePath);
+      return res.status(500).json({ msg: 'File upload failed. Please try again.' });
+    }
+
+    // Construct the full URL for the media
+    const protocol = req.protocol;
+    const host = req.get('host');
+    const mediaUrl = `/uploads/${req.file.filename}`;
+    const fullMediaUrl = `${protocol}://${host}${mediaUrl}`;
+
     const newPost = new Post({
       user: req.user.id,
-      mediaUrl: `/uploads/${req.file.filename}`,
+      mediaUrl: mediaUrl,
       title: req.body.title || '',
       mediaType: req.file.mimetype,
     });
 
     const post = await newPost.save();
-    res.json(post);
+    
+    // Return post with full URL for immediate use
+    res.json({
+      ...post.toObject(),
+      fullMediaUrl: fullMediaUrl
+    });
   } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server error');
+    console.error('Error creating post:', err.message);
+    
+    // If post creation failed but file was uploaded, try to clean up
+    if (req.file) {
+      const filePath = path.join(__dirname, '../uploads', req.file.filename);
+      try {
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+        }
+      } catch (cleanupErr) {
+        console.error('Error cleaning up file:', cleanupErr);
+      }
+    }
+    
+    res.status(500).json({ msg: 'Server error', error: err.message });
   }
 };
 
