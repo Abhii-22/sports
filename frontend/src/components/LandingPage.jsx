@@ -90,23 +90,6 @@ const LandingPage = () => {
             </Link>
             <Link to="/signin" className="btn btn-secondary">Sign In</Link>
           </div>
-
-          <div className="stats-section">
-            <div className="stat-item">
-              <div className="stat-number">10K+</div>
-              <div className="stat-label">MEMBERS</div>
-            </div>
-            <div className="stat-divider"></div>
-            <div className="stat-item">
-              <div className="stat-number">500+</div>
-              <div className="stat-label">EVENTS</div>
-            </div>
-            <div className="stat-divider"></div>
-            <div className="stat-item">
-              <div className="stat-number">50+</div>
-              <div className="stat-label">SPORTS</div>
-            </div>
-          </div>
         </div>
       </div>
 

@@ -166,17 +166,19 @@ const Profile = () => {
   };
 
   const handleMediaError = (e, post) => {
-    const fullUrl = getMediaUrl(post.mediaUrl);
-    console.error('Error loading media:', {
-      mediaUrl: post.mediaUrl,
-      fullUrl: fullUrl,
-      mediaType: post.mediaType,
-      postId: post._id,
-      apiUrl: API
-    });
-    
     const target = e.target;
     target.onerror = null; // Prevent infinite loop
+    
+    // Only log errors in development mode
+    if (process.env.NODE_ENV === 'development') {
+      const fullUrl = getMediaUrl(post.mediaUrl);
+      console.warn('Media failed to load:', {
+        mediaUrl: post.mediaUrl,
+        fullUrl: fullUrl,
+        mediaType: post.mediaType,
+        postId: post._id
+      });
+    }
     
     // Hide the media element
     if (target.tagName.toLowerCase() === 'img') {
@@ -187,6 +189,8 @@ const Profile = () => {
     
     // Check if error div already exists to avoid duplicates
     const parent = target.parentNode;
+    if (!parent) return;
+    
     const existingError = parent.querySelector('.media-error');
     if (existingError) {
       return;
@@ -485,7 +489,9 @@ const Profile = () => {
                       autoPlay 
                       className="modal-video"
                       onError={(e) => {
-                        console.error('Error loading video in modal:', selectedPost.mediaUrl);
+                        if (process.env.NODE_ENV === 'development') {
+                          console.warn('Video failed to load in modal:', selectedPost.mediaUrl);
+                        }
                         e.target.style.display = 'none';
                       }}
                     />
@@ -495,7 +501,9 @@ const Profile = () => {
                       alt={selectedPost.title} 
                       className="modal-image"
                       onError={(e) => {
-                        console.error('Error loading image in modal:', selectedPost.mediaUrl);
+                        if (process.env.NODE_ENV === 'development') {
+                          console.warn('Image failed to load in modal:', selectedPost.mediaUrl);
+                        }
                         e.target.style.display = 'none';
                       }}
                     />
@@ -507,7 +515,9 @@ const Profile = () => {
                     alt={selectedPost.title} 
                     className="modal-image"
                     onError={(e) => {
-                      console.error('Error loading event poster in modal:', selectedPost.poster);
+                      if (process.env.NODE_ENV === 'development') {
+                        console.warn('Event poster failed to load in modal:', selectedPost.poster);
+                      }
                       e.target.style.display = 'none';
                     }}
                   />
